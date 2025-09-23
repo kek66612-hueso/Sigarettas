@@ -1,40 +1,40 @@
-from flight import Flight
+from storage import Warehouse
 from database import DatabaseConnection
 
 
-class FlightRepository:
-
+class WarehouseRepository:
+    '''Класс-репозиторий для доступа к БД'''
 
     def __init__(self,connection: DatabaseConnection):
         self.connection=connection
 
-    def create_flight(self, flight:Flight):
-
+    def create_storage(self, storage:Warehouse):
+        """Добавление овоща"""
 
         conn = self.connection.get_connection()
         cursor = conn.cursor()
 
         cursor.execute('''
-            INSERT INTO flights
+            INSERT INTO warehouse
                         (plane,price)
                         VALUES (%s,%s)
-            ''',(flight.plane,flight.price))
+            ''',(storage.box,storage.weight))
         conn.commit()
 
         cursor.close()
         conn.close()
 
-        return flight
+        return storage
     
     def get_all(self):
         conn = self.connection.get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM flights ORDER BY id")
+        cursor.execute("SELECT * FROM vegetables ORDER BY id")
         rows = cursor.fetchall()
 
-        flights = []
+        storage = []
         for row in rows:
-            flights.append(Flight(
+            storage.append(storage(
                 row[0],
                 row[1],
                 row[2]
@@ -42,56 +42,56 @@ class FlightRepository:
               
         cursor.close()
         conn.close()
-        return flights
+        return storage
         
-    def get_by_id(self,flight_id:int):
-        """Получить рейс по идентификатору"""
+    def get_by_id(self,storage_id:int):
+        """Получить овощ по идентификатору"""
         conn = self.connection.get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("SELECT * FROM flights WHERE id = %s",(flight_id,))
+        cursor.execute("SELECT * FROM vegetables WHERE id = %s",(storage_id,))
         row = cursor.fetchone()
         
         cursor.close()
         conn.close()
 
         if row:
-            return Flight(
+            return Warehouse(
                 row[0],
                 row[1],
                 row[2]
             )
         return None
     
-    def update_flight(self, flight:Flight):
-        """Изменить существующий рейс. 
-            Если рейса не существует, ничего не делать."""
+    def update_storage(self, storage:Warehouse):
+        """Изменить существующий овощ. 
+            Если овоща не существует, ничего не делать."""
         conn = self.connection.get_connection()
         cursor = conn.cursor()
         
         cursor.execute('''
-            UPDATE flights
+            UPDATE vegetables
             SET price = %s, plane = %s
             WHERE id = %s
-            ''',(flight.price, flight.plane, flight.id))
+            ''',(storage.weight, storage.box, storage.id))
         
         result = cursor.fetchone()
-        flight.id = result[0]
+        storage.id = result[0]
         conn.commit()
 
         cursor.close()
         conn.close()
 
-        return flight
+        return storage
     
-    def delete_flight(self,flight_id:int):
-        """Удалить существующий рейс.
-            Если рейса не существует, ничего не делать."""
+    def delete_storage(self,storage_id:int):
+        """Удалить существующий овощ.
+            Если овоща не существует, ничего не делать."""
         conn = self.connection.get_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            DELETE FROM flights WHERE id = %s
-            ''',(flight_id,))
+            DELETE FROM vegetables WHERE id = %s
+            ''',(storage_id,))
         conn.commit()
         deleted = cursor.rowcount
 
@@ -99,4 +99,3 @@ class FlightRepository:
         conn.close()
 
         return deleted >0
-

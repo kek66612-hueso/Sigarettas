@@ -12,7 +12,7 @@ class MigrationManager:
         
         #Execution
         cursor.execute('''
-            CREATE TABLE IF NOT EXISTS flights(
+            CREATE TABLE IF NOT EXISTS vegetables(
                         id SERIAL PRIMARY KEY,
                         plane VARCHAR(100) NOT NULL,
                         price DECIMAL(10,2) NOT NULL
@@ -23,4 +23,3 @@ class MigrationManager:
         #Deinitialize
         cursor.close()
         conn.close()
-

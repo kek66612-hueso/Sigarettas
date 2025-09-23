@@ -1,14 +1,14 @@
 from database import DatabaseConfig, DatabaseConnection
 from migrations import MigrationManager
-from repository import FlightRepository
-from service import FlightService
+from repository import WarehouseRepository
+from service import WarehouseService
 from fastapi import FastAPI, HTTPException
-from flight import Flight
+from storage import Warehouse
 
 #Initialize
 ## DB config
 db_config= DatabaseConfig(
-    'flightsdb',
+    'storagesdb',
     'postgres',
     'postgres',
     '123Secret_a',
@@ -19,46 +19,44 @@ db_connection = DatabaseConnection(db_config)
 migration_manager = MigrationManager(db_config)
 migration_manager.create_tables()
 # Repository and Service
-repository = FlightRepository(db_connection)
-service = FlightService(repository)
+repository = WarehouseRepository(db_connection)
+service = WarehouseService(repository)
 
 app = FastAPI(
-    title="Flight API"
+    title="Storage API"
 )
 
 @app.get("/")
 async def root():
     return {"message":"Hello from FastAPI"}
 
-@app.get("/flights")
-async def get_flights():
+@app.get("/vegetables")
+async def get_vegetables():
     try:
         return service.get_all()
     except Exception as e:
-        return HTTPException(status_code=500, detail=f"Ошибка при получении полётов: {str(e)}")
+        return HTTPException(status_code=500, detail=f"Ошибка при получении овощей: {str(e)}")
 
-@app.post("/flights")
-async def create_flight(flight_data: dict):
+@app.post("/vegetables")
+async def create_vegetables(flight_data: dict):
     try:
         #Validation
-        required_fields = ["price","plane"]
+        required_fields = ["weight","box"]
         for field in required_fields:
             if field not in flight_data:
                 raise HTTPException(status_code=400,detail=f"Отсутствует обязательное поле {field}")
         
-        flight = Flight(
-            price=flight_data['price'],
-            plane=flight_data['plane']
+        storage = Warehouse(
+            weight=storage_data['weight'],
+            box=storage_data['box']
         )
 
-        created_flight = service.create_flight(flight)
-        return created_flight
+        created_storage = service.create_storage(storage)
+        return created_storage
 
     except Exception as e:
-        return HTTPException(status_code=500, detail=f"Ошибка при добавлении полёта: {str(e)}")
+        return HTTPException(status_code=500, detail=f"Ошибка при добавлении овощей: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app,host="0.0.0.0", port=8080)
-
-
